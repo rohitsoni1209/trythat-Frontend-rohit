@@ -3,7 +3,7 @@ name: Build and Deploy CRM-Frontend with Docker
 on:
   push:
     branches:
-      - master
+      - main
 
 jobs:
   build-and-push:
