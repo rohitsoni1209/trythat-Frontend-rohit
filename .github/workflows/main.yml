@@ -38,7 +38,7 @@ jobs:
             -Dsonar.login=$SONAR_TOKEN \
             -X
 
-      - name: Build Docker Image for Backend
+      - name: Build Docker Image for Frontend
         run: docker build -t ${{ secrets.DOCKER_USERNAME }}/trythat-frontend-rohit:latest .
 
       - name: Log in to Docker Hub
