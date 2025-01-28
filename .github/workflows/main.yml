@@ -47,6 +47,8 @@ jobs:
           rm -f /tmp/id_rsa
 
 
+
+
   sonar-scan:
     name: SonarQube Analysis
     runs-on: ubuntu-latest
@@ -55,17 +57,18 @@ jobs:
       - name: Check out the repository
         uses: actions/checkout@v2
 
-      # Set up Java 17 for SonarScanner
-      - name: Set up Java 23
+      # Explicitly set up Java 17 for SonarScanner execution
+      - name: Set up Java 17
         uses: actions/setup-java@v3
         with:
-          java-version: '23'
-          distribution: 'zulu'
+          java-version: '17'
+          distribution: 'zulu'  # You can also use 'adoptopenjdk' if needed
 
+      # Verifying Java version
       - name: Verify Java version
         run: java -version
 
-      # Install SonarScanner
+      # Install SonarScanner (if it's not installed globally in the runner)
       - name: Install SonarScanner
         run: |
           wget https://binaries.sonarsource.com/Distribution/sonar-scanner-cli/sonar-scanner-cli-4.8.0.2856-linux.zip
@@ -73,12 +76,13 @@ jobs:
           mv sonar-scanner-4.8.0.2856-linux $HOME/sonar-scanner
           echo "$HOME/sonar-scanner/bin" >> $GITHUB_PATH
 
+      # Verifying SonarScanner installation
       - name: Verify SonarScanner Installation
         run: |
           echo "PATH: $PATH"
           sonar-scanner --version
 
-      # Run SonarQube Scanner
+      # Run the SonarScanner analysis
       - name: Run SonarQube scanner
         env:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
@@ -90,4 +94,3 @@ jobs:
             -Dsonar.host.url=$SONAR_HOST_URL \
             -Dsonar.login=$SONAR_TOKEN \
             -X
-
