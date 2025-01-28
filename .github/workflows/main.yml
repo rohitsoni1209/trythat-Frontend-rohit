@@ -1,17 +1,17 @@
-name: Build, Test, and Deploy with SonarCloud
+name: Build and Deploy Frontend with Docker and SonarCloud
 
 on:
   push:
     branches:
       - main
-  
 
 jobs:
-  build-and-deploy:
+  build-and-push:
+    name: Build and Push Docker Image for Frontend
     runs-on: ubuntu-latest
 
     steps:
-      - name: Check out the repository
+      - name: Check out repository
         uses: actions/checkout@v2
 
       - name: Set up Node.js
@@ -22,20 +22,23 @@ jobs:
       - name: Install dependencies
         run: npm install
 
-      - name: Run SonarCloud Analysis
+      - name: Install SonarScanner
+        run: npm install -g sonar-scanner
+
+      - name: Run SonarCloud scan
         env:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }} # Store your SonarCloud token in GitHub Secrets
+          SONAR_HOST_URL: "https://sonarcloud.io" # SonarCloud URL
         run: |
-          npm install -g sonar-scanner
           sonar-scanner \
             -Dsonar.projectKey=rohitsoni1209_trythat-Frontend-rohit \
             -Dsonar.organization=rohitsoni1209 \
             -Dsonar.sources=. \
-            -Dsonar.host.url=https://sonarcloud.io \
+            -Dsonar.host.url=$SONAR_HOST_URL \
             -Dsonar.login=$SONAR_TOKEN \
             -X
 
-      - name: Build Docker Image
+      - name: Build Docker Image for Backend
         run: docker build -t ${{ secrets.DOCKER_USERNAME }}/trythat-frontend-rohit:latest .
 
       - name: Log in to Docker Hub
@@ -44,35 +47,42 @@ jobs:
           username: ${{ secrets.DOCKER_USERNAME }}
           password: ${{ secrets.DOCKER_PASSWORD }}
 
-      - name: Push Docker Image
+      - name: Push Docker Image to Docker Hub
         run: docker push ${{ secrets.DOCKER_USERNAME }}/trythat-frontend-rohit:latest
 
-      - name: Deploy on EC2
-        env:
-          EC2_PUBLIC_IP: ${{ secrets.EC2_PUBLIC_IP }}
-          EC2_SSH_KEY: ${{ secrets.EC2_SSH_KEY }}
-          DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
-          DOCKER_PASSWORD: ${{ secrets.DOCKER_PASSWORD }}
+  deploy:
+    name: Deploy Frontend Application
+    needs: build-and-push
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Set up SSH Key for EC2
         run: |
-          # Write the SSH key to a file
           echo "${{ secrets.EC2_SSH_KEY }}" > /tmp/id_rsa
           chmod 600 /tmp/id_rsa
 
-          # SSH into the EC2 instance and deploy the Docker container
+      - name: SSH into EC2 and Deploy Frontend Docker Container
+        run: |
           ssh -o StrictHostKeyChecking=no -i /tmp/id_rsa ec2-user@${{ secrets.EC2_PUBLIC_IP }} << 'EOF'
-            # Stop and remove the existing container (if running)
+            # Update and install Docker on EC2 if not installed
+            sudo yum update -y
+            sudo amazon-linux-extras install docker -y
+            sudo service docker start
+            sudo usermod -aG docker ec2-user
+
+            # Log in to Docker Hub
+            sudo docker login -u ${{ secrets.DOCKER_USERNAME }} -p ${{ secrets.DOCKER_PASSWORD }}
+
+            # Pull the latest Frontend image
+            sudo docker pull ${{ secrets.DOCKER_USERNAME }}/trythat-frontend-rohit:latest
+
+            # Remove old container if it exists
             sudo docker stop trythat-frontend-rohit || true
             sudo docker rm trythat-frontend-rohit || true
 
-            # Pull the latest Docker image
-            sudo docker pull $DOCKER_USERNAME/trythat-frontend-rohit:latest
+            # Run the Backend Docker container
+            sudo docker run -d -p 80:80 --name trythat-frontend-rohit ${{ secrets.DOCKER_USERNAME }}/trythat-frontend-rohit:latest
 
-            # Run the Docker container
-            sudo docker run -d -p 80:80 --name trythat-frontend-rohit $DOCKER_USERNAME/trythat-frontend-rohit:latest
-
-            # Cleanup unused Docker resources
+            # Optionally remove unused containers and images
             sudo docker system prune -f
           EOF
-
-          # Remove the SSH key for security
-          rm -f /tmp/id_rsa
