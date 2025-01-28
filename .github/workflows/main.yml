@@ -5,6 +5,7 @@ on:
     branches:
       - main
 
+
 jobs:
   build-and-deploy:
     name: Build and Deploy Docker Image
@@ -46,9 +47,6 @@ jobs:
 
           rm -f /tmp/id_rsa
 
-
-
-
   sonar-scan:
     name: SonarQube Analysis
     runs-on: ubuntu-latest
@@ -62,13 +60,13 @@ jobs:
         uses: actions/setup-java@v3
         with:
           java-version: '17'
-          distribution: 'zulu'  # You can also use 'adoptopenjdk' if needed
+          distribution: 'zulu'
 
-      # Verifying Java version
-      - name: Verify Java version
-        run: java -version
+      # Set JAVA_HOME explicitly for SonarQube
+      - name: Set JAVA_HOME
+        run: echo "JAVA_HOME=$(dirname $(dirname $(readlink -f $(which javac))))" >> $GITHUB_ENV
 
-      # Install SonarScanner (if it's not installed globally in the runner)
+      # Install SonarScanner
       - name: Install SonarScanner
         run: |
           wget https://binaries.sonarsource.com/Distribution/sonar-scanner-cli/sonar-scanner-cli-4.8.0.2856-linux.zip
@@ -76,13 +74,7 @@ jobs:
           mv sonar-scanner-4.8.0.2856-linux $HOME/sonar-scanner
           echo "$HOME/sonar-scanner/bin" >> $GITHUB_PATH
 
-      # Verifying SonarScanner installation
-      - name: Verify SonarScanner Installation
-        run: |
-          echo "PATH: $PATH"
-          sonar-scanner --version
-
-      # Run the SonarScanner analysis
+      # Run SonarQube analysis
       - name: Run SonarQube scanner
         env:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
