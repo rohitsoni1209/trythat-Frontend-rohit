@@ -1,19 +1,38 @@
-name: Build, Deploy, and Analyze TryThat-Frontend-Rohit with Docker and SonarQube
+name: Build, Test, and Deploy with SonarCloud
 
 on:
   push:
     branches:
       - main
-
+  
 
 jobs:
   build-and-deploy:
-    name: Build and Deploy Docker Image
     runs-on: ubuntu-latest
 
     steps:
       - name: Check out the repository
         uses: actions/checkout@v2
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v2
+        with:
+          node-version: '18' # Specify your Node.js version
+
+      - name: Install dependencies
+        run: npm install
+
+      - name: Run SonarCloud Analysis
+        env:
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }} # Store your SonarCloud token in GitHub Secrets
+        run: |
+          npm install -g sonar-scanner
+          sonar-scanner \
+            -Dsonar.projectKey=rohitsoni1209_trythat-Frontend-rohit \
+            -Dsonar.organization=Rohit Soni \
+            -Dsonar.sources=. \
+            -Dsonar.host.url=https://sonarcloud.io \
+            -Dsonar.login=$SONAR_TOKEN
 
       - name: Build Docker Image
         run: docker build -t ${{ secrets.DOCKER_USERNAME }}/trythat-frontend-rohit:latest .
@@ -34,55 +53,25 @@ jobs:
           DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
           DOCKER_PASSWORD: ${{ secrets.DOCKER_PASSWORD }}
         run: |
+          # Write the SSH key to a file
           echo "${{ secrets.EC2_SSH_KEY }}" > /tmp/id_rsa
           chmod 600 /tmp/id_rsa
 
+          # SSH into the EC2 instance and deploy the Docker container
           ssh -o StrictHostKeyChecking=no -i /tmp/id_rsa ec2-user@${{ secrets.EC2_PUBLIC_IP }} << 'EOF'
+            # Stop and remove the existing container (if running)
             sudo docker stop trythat-frontend-rohit || true
             sudo docker rm trythat-frontend-rohit || true
+
+            # Pull the latest Docker image
             sudo docker pull $DOCKER_USERNAME/trythat-frontend-rohit:latest
+
+            # Run the Docker container
             sudo docker run -d -p 80:80 --name trythat-frontend-rohit $DOCKER_USERNAME/trythat-frontend-rohit:latest
+
+            # Cleanup unused Docker resources
             sudo docker system prune -f
           EOF
 
+          # Remove the SSH key for security
           rm -f /tmp/id_rsa
-
-  sonar-scan:
-    name: SonarQube Analysis
-    runs-on: ubuntu-latest
-
-    steps:
-      - name: Check out the repository
-        uses: actions/checkout@v2
-
-      # Explicitly set up Java 17 for SonarScanner execution
-      - name: Set up Java 17
-        uses: actions/setup-java@v3
-        with:
-          java-version: '17'
-          distribution: 'zulu'
-
-      # Set JAVA_HOME explicitly for SonarQube
-      - name: Set JAVA_HOME
-        run: echo "JAVA_HOME=$(dirname $(dirname $(readlink -f $(which javac))))" >> $GITHUB_ENV
-
-      # Install SonarScanner
-      - name: Install SonarScanner
-        run: |
-          wget https://binaries.sonarsource.com/Distribution/sonar-scanner-cli/sonar-scanner-cli-4.8.0.2856-linux.zip
-          unzip sonar-scanner-cli-4.8.0.2856-linux.zip
-          mv sonar-scanner-4.8.0.2856-linux $HOME/sonar-scanner
-          echo "$HOME/sonar-scanner/bin" >> $GITHUB_PATH
-
-      # Run SonarQube analysis
-      - name: Run SonarQube scanner
-        env:
-          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
-          SONAR_HOST_URL: ${{ secrets.SONAR_HOST_URL }}
-        run: |
-          sonar-scanner \
-            -Dsonar.projectKey=rohitsoni1209_trythat-frontend-rohit \
-            -Dsonar.sources=./src \
-            -Dsonar.host.url=$SONAR_HOST_URL \
-            -Dsonar.login=$SONAR_TOKEN \
-            -X
