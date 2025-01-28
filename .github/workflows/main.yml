@@ -88,7 +88,8 @@ jobs:
           SONAR_HOST_URL: ${{ secrets.SONAR_HOST_URL }}
         run: |
           sonar-scanner \
-            -Dsonar.projectKey=trythat-frontend-rohit \
+            -Dsonar.projectKey=rohitsoni1209_trythat-Frontend-rohit \
             -Dsonar.sources=./src \
             -Dsonar.host.url=$SONAR_HOST_URL \
             -Dsonar.login=$SONAR_TOKEN
+            -X # Enable debug logging for detailed error messages
