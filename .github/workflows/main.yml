@@ -56,10 +56,10 @@ jobs:
         uses: actions/checkout@v2
 
       # Set up Java 17 for SonarScanner
-      - name: Set up Java 21
+      - name: Set up Java 23
         uses: actions/setup-java@v3
         with:
-          java-version: '21'
+          java-version: '23'
           distribution: 'zulu'
 
       - name: Verify Java version
