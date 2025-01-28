@@ -33,27 +33,17 @@ jobs:
           DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
           DOCKER_PASSWORD: ${{ secrets.DOCKER_PASSWORD }}
         run: |
-          # Write the SSH key to a file
           echo "${{ secrets.EC2_SSH_KEY }}" > /tmp/id_rsa
           chmod 600 /tmp/id_rsa
 
-          # SSH into the EC2 instance and deploy the Docker container
           ssh -o StrictHostKeyChecking=no -i /tmp/id_rsa ec2-user@${{ secrets.EC2_PUBLIC_IP }} << 'EOF'
-            # Stop and remove the existing container (if running)
             sudo docker stop trythat-frontend-rohit || true
             sudo docker rm trythat-frontend-rohit || true
-
-            # Pull the latest Docker image
             sudo docker pull $DOCKER_USERNAME/trythat-frontend-rohit:latest
-
-            # Run the Docker container
             sudo docker run -d -p 80:80 --name trythat-frontend-rohit $DOCKER_USERNAME/trythat-frontend-rohit:latest
-
-            # Cleanup unused Docker resources
             sudo docker system prune -f
           EOF
 
-          # Remove the SSH key for security
           rm -f /tmp/id_rsa
 
   sonar-scan:
@@ -67,7 +57,7 @@ jobs:
       - name: Set up Java
         uses: actions/setup-java@v3
         with:
-          java-version: '17' # Updated to Java 17
+          java-version: '17'
           distribution: 'zulu'
 
       - name: Install SonarScanner
@@ -88,8 +78,8 @@ jobs:
           SONAR_HOST_URL: ${{ secrets.SONAR_HOST_URL }}
         run: |
           sonar-scanner \
-            -Dsonar.projectKey=rohitsoni1209_trythat-Frontend-rohit \
+            -Dsonar.projectKey=rohitsoni1209_trythat-frontend-rohit \
             -Dsonar.sources=./src \
             -Dsonar.host.url=$SONAR_HOST_URL \
-            -Dsonar.login=$SONAR_TOKEN
-            -X # Enable debug logging for detailed error messages
+            -Dsonar.login=$SONAR_TOKEN \
+            -X
