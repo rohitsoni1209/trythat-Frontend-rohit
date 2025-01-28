@@ -1,5 +1,5 @@
-name: Build and Deploy TryThat-Frontend-Rohit with Docker
-#
+name: Build, Deploy, and Analyze TryThat-Frontend-Rohit with Docker and SonarQube
+
 on:
   push:
     branches:
@@ -55,3 +55,23 @@ jobs:
 
           # Remove the SSH key for security
           rm -f /tmp/id_rsa
+
+  sonar-scan:
+    name: SonarQube Analysis
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out the repository
+        uses: actions/checkout@v2
+
+      - name: Set up Java
+        uses: actions/setup-java@v3
+        with:
+          java-version: '11'  # Adjust as per your project requirements
+
+      - name: Run SonarQube Scanner
+        run: |
+          sonar-scanner \
+            -Dsonar.projectKey=trythat-frontend-rohit \
+            -Dsonar.sources=./src \
+            -Dsonar.host.url=${{ secrets.SONAR_HOST_URL }} \
+            -Dsonar.login=${{ secrets.SONAR_TOKEN }}
