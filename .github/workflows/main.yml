@@ -32,7 +32,7 @@ jobs:
             -Dsonar.organization=rohitsoni1209 \
             -Dsonar.sources=. \
             -Dsonar.host.url=https://sonarcloud.io \
-            -Dsonar.login=$SONAR_TOKEN
+            -Dsonar.login=$SONAR_TOKEN \
             -X
 
       - name: Build Docker Image
