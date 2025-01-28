@@ -60,6 +60,9 @@ jobs:
           java-version: '17'
           distribution: 'zulu'
 
+      - name: Verify Java version
+        run: java -version
+
       - name: Install SonarScanner
         run: |
           wget https://binaries.sonarsource.com/Distribution/sonar-scanner-cli/sonar-scanner-cli-4.8.0.2856-linux.zip
