@@ -29,7 +29,7 @@ jobs:
           npm install -g sonar-scanner
           sonar-scanner \
             -Dsonar.projectKey=rohitsoni1209_trythat-Frontend-rohit \
-            -Dsonar.organization=Rohit Soni \
+            -Dsonar.organization="Rohit Soni" \
             -Dsonar.sources=. \
             -Dsonar.host.url=https://sonarcloud.io \
             -Dsonar.login=$SONAR_TOKEN
