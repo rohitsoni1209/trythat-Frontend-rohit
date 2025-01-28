@@ -62,7 +62,7 @@ jobs:
         uses: actions/setup-java@v3
         with:
           java-version: '17'
-          distribution: 'adoptopenjdk'  # You can also use 'adoptopenjdk' if needed
+          distribution: 'zulu'  # You can also use 'adoptopenjdk' if needed
 
       # Verifying Java version
       - name: Verify Java version
