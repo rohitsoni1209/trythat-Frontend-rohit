@@ -1,4 +1,14 @@
-name: Build, Test, and Deploy Frontend with Docker, SonarCloud, and Security Scans
+# Stages
+# 1. snyk_scan - Software Composition Analysis (SCA)
+# 2. sonarcloud_scan - Static Application Security Testing (SAST)
+# 3. docker build and push
+# 4. deploy (AWS EC2)
+# 5. zap_scan - Dynamic Application Security Testing (DAST)
+# 6. trivy_scan - Container Security Scan
+
+
+
+name: Build, Test, and Deploy Frontend with Docker, AWS, SonarCloud, Snyk and Zap
 
 on:
   push:
@@ -6,7 +16,7 @@ on:
       - main
 
 jobs:
-  snyk_scan:
+  SCA_snyk_scan:
     name: Run Snyk SCA Scan for Vulnerabilities
     runs-on: ubuntu-latest
 
@@ -29,9 +39,9 @@ jobs:
         with:
           command: monitor
 
-  sonarcloud_scan:
+  SAST_sonarcloud_scan:
     name: Run SonarCloud SAST Scan
-    needs: snyk_scan
+    needs: SCA_snyk_scan
     runs-on: ubuntu-latest
 
     steps:
@@ -56,7 +66,7 @@ jobs:
 
   docker_build_and_push:
     name: Build and Push Docker Image for Frontend
-    needs: sonarcloud_scan
+    needs: SAST_sonarcloud_scan
     runs-on: ubuntu-latest
 
     steps:
@@ -112,7 +122,7 @@ jobs:
             sudo docker system prune -f
           EOF
 
-  zap_scan:
+  DAST_zap_scan:
     name: Scan the Web Application with ZAP
     needs: deploy
     runs-on: ubuntu-latest
