@@ -97,6 +97,7 @@ jobs:
 
             # Optionally remove unused containers and images
             sudo docker system prune -f
+          EOF
 
 
   zap_scan:
@@ -115,4 +116,4 @@ jobs:
           target: 'http://43.204.114.112/'
           rules_file_name: '.zap/rules.tsv'
           cmd_options: '-a'      
-        
+       
