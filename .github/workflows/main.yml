@@ -85,7 +85,7 @@ jobs:
       - name: Push Docker Image to Docker Hub
         run: docker push ${{ secrets.DOCKER_USERNAME }}/trythat-frontend-rohit:latest
 
-  trivy_scan:
+  Container_trivy_scan:
     name: Run Trivy Security Scan on Docker Image
     needs: docker_build_and_push
     runs-on: ubuntu-latest
@@ -102,7 +102,7 @@ jobs:
 
   deploy:
     name: Deploy Frontend Application to EC2
-    needs: docker_build_and_push
+    needs: Container_trivy_scan
     runs-on: ubuntu-latest
 
     steps:
