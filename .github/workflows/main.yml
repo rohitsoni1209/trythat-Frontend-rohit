@@ -2,9 +2,9 @@
 # 1. snyk_scan - Software Composition Analysis (SCA)
 # 2. sonarcloud_scan - Static Application Security Testing (SAST)
 # 3. docker build and push
-# 4. deploy (AWS EC2)
-# 5. zap_scan - Dynamic Application Security Testing (DAST)
-# 6. trivy_scan - Container Security Scan
+# 4. trivy_scan - Container Security Scan
+# 5. deploy (AWS EC2)
+# 6. zap_scan - Dynamic Application Security Testing (DAST)
 
 
 
@@ -84,6 +84,21 @@ jobs:
 
       - name: Push Docker Image to Docker Hub
         run: docker push ${{ secrets.DOCKER_USERNAME }}/trythat-frontend-rohit:latest
+
+  trivy_scan:
+    name: Run Trivy Security Scan on Docker Image
+    needs: docker_build_and_push
+    runs-on: ubuntu-latest
+    steps:
+      - name: Run Trivy vulnerability scanner
+        uses: aquasecurity/trivy-action@0.28.0
+        with:
+          image-ref: 'docker.io/${{ secrets.DOCKER_USERNAME }}/trythat-frontend-rohit:${{ github.sha }}'
+          format: 'table'
+          exit-code: '1'
+          ignore-unfixed: true
+          vuln-type: 'os,library'
+          severity: 'CRITICAL,HIGH'
 
   deploy:
     name: Deploy Frontend Application to EC2
