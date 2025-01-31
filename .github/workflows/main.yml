@@ -1,4 +1,4 @@
-# Stages
+## Stages
 # 1. snyk_scan - Software Composition Analysis (SCA)
 # 2. sonarcloud_scan - Static Application Security Testing (SAST)
 # 3. docker build and push
