@@ -91,7 +91,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Pull the built Docker image
-        run: docker pull ${{ secrets.DOCKER_USERNAME }}/trythat-frontend-rohit:${{ github.sha }
+        run: docker pull ${{ secrets.DOCKER_USERNAME }}/trythat-frontend-rohit:${{ github.sha }}
         
       - name: Run Trivy vulnerability scanner
         uses: aquasecurity/trivy-action@0.28.0
