@@ -90,6 +90,9 @@ jobs:
     needs: docker_build_and_push
     runs-on: ubuntu-latest
     steps:
+      - name: Pull the built Docker image
+        run: docker pull ${{ secrets.DOCKER_USERNAME }}/trythat-frontend-rohit:${{ github.sha }
+        
       - name: Run Trivy vulnerability scanner
         uses: aquasecurity/trivy-action@0.28.0
         with:
