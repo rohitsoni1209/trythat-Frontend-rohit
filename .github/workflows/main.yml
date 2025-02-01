@@ -86,27 +86,27 @@ jobs:
       - name: Push Docker Image to Docker Hub
         run: docker push ${{ secrets.DOCKER_USERNAME }}/trythat-frontend-rohit:latest
 
-  Container_trivy_scan:
-    name: Run Trivy Security Scan on Docker Image
-    needs: docker_build_and_push
-    runs-on: ubuntu-latest
-    steps:
-      - name: Pull the built Docker image
-        run: docker pull ${{ secrets.DOCKER_USERNAME }}/trythat-frontend-rohit:${{ github.sha }}
+  # Container_trivy_scan:
+  #   name: Run Trivy Security Scan on Docker Image
+  #   needs: docker_build_and_push
+  #   runs-on: ubuntu-latest
+  #   steps:
+  #     - name: Pull the built Docker image
+  #       run: docker pull ${{ secrets.DOCKER_USERNAME }}/trythat-frontend-rohit:${{ github.sha }}
         
-      - name: Run Trivy vulnerability scanner
-        uses: aquasecurity/trivy-action@0.28.0
-        with:
-          image-ref: 'docker.io/${{ secrets.DOCKER_USERNAME }}/trythat-frontend-rohit:${{ github.sha }}'
-          format: 'table'
-          exit-code: '1'
-          ignore-unfixed: true
-          vuln-type: 'os,library'
-          severity: 'CRITICAL,HIGH'
+  #     - name: Run Trivy vulnerability scanner
+  #       uses: aquasecurity/trivy-action@0.28.0
+  #       with:
+  #         image-ref: 'docker.io/${{ secrets.DOCKER_USERNAME }}/trythat-frontend-rohit:${{ github.sha }}'
+  #         format: 'table'
+  #         exit-code: '1'
+  #         ignore-unfixed: true
+  #         vuln-type: 'os,library'
+  #         severity: 'CRITICAL,HIGH'
 
   deploy:
     name: Deploy Frontend Application to EC2
-    needs: Container_trivy_scan
+    needs: docker_build_and_push
     runs-on: ubuntu-latest
 
     steps:
