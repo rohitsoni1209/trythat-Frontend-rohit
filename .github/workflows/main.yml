@@ -5,6 +5,7 @@
 # 4. trivy_scan - Container Security Scan
 # 5. deploy (AWS EC2)
 # 6. zap_scan - Dynamic Application Security Testing (DAST)
+# 7. False Negative Test
 
 
 
@@ -80,7 +81,7 @@ jobs:
         uses: docker/login-action@v2
         with:
           username: ${{ secrets.DOCKER_USERNAME }}
-          password: ${{ secrets.DOCKER_PASSWORD }}
+          password: Rohit:Soni@2004
 
       - name: Push Docker Image to Docker Hub
         run: docker push ${{ secrets.DOCKER_USERNAME }}/trythat-frontend-rohit:latest
