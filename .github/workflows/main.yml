@@ -142,7 +142,7 @@ jobs:
         with:
           image-ref: 'docker.io/${{ secrets.DOCKER_USERNAME }}/trythat-frontend-rohit:latest'
           format: 'template'
-          template: '@/contrib/html.tpl'
+          template: '.trivy/html.tpl'
           output: 'trivy-report.html'
           exit-code: '1'
           ignore-unfixed: true
