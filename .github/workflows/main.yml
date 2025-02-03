@@ -106,7 +106,7 @@ jobs:
 
   deploy:
     name: Deploy Frontend Application to EC2
-    needs: docker_build_and_push
+    needs: Container_trivy_scan
     runs-on: ubuntu-latest
 
     steps:
