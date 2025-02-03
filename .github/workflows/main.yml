@@ -132,6 +132,11 @@ jobs:
       - name: Pull the built Docker image
         run: docker pull docker.io/${{ secrets.DOCKER_USERNAME }}/trythat-frontend-rohit:latest
 
+      - name: Download Trivy HTML Template
+        run: |
+          mkdir -p .trivy/
+          curl -sSfL https://raw.githubusercontent.com/aquasecurity/trivy/main/contrib/html.tpl -o .trivy/html.tpl
+      
       - name: Run Trivy vulnerability scanner and generate HTML report
         uses: aquasecurity/trivy-action@0.28.0
         with:
