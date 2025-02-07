@@ -86,76 +86,6 @@ jobs:
       - name: Push Docker Image to Docker Hub
         run: docker push ${{ secrets.DOCKER_USERNAME }}/trythat-frontend-rohit:latest
 
-  # Container_trivy_scan:
-  #   name: Run Trivy Security Scan on Docker Image
-  #   needs: docker_build_and_push
-  #   runs-on: ubuntu-latest
-  #   steps:
-  #     - name: Log in to Docker Hub  
-  #       uses: docker/login-action@v2  
-  #       with:  
-  #         username: ${{ secrets.DOCKER_USERNAME }}  
-  #         password: ${{ secrets.DOCKER_PASSWORD }} 
-      
-  #     - name: Pull the built Docker image
-  #       run: docker pull ${{ secrets.DOCKER_USERNAME }}/trythat-frontend-rohit:latest
-
-  #     - name: Run Trivy vulnerability scanner and generate HTML report
-  #       uses: aquasecurity/trivy-action@0.28.0
-  #       with:
-  #         image-ref: 'docker.io/***/trythat-frontend-rohit:latest'
-  #         format: 'template'
-  #         template: '@/contrib/html.tpl'
-  #         output: 'trivy-report.html'
-
-  #     - name: Upload Trivy HTML Report
-  #       uses: actions/upload-artifact@v4
-  #       with:
-  #         name: trivy-html-report
-  #         path: trivy-report.html
-
-
-  # Container_trivy_scan:
-  #     name: Run Trivy Security Scan on Docker Image
-  #     needs: docker_build_and_push
-  #     runs-on: ubuntu-latest
-  #     steps:
-  #     - name: Log in to Docker Hub  
-  #       uses: docker/login-action@v2  
-  #       with:  
-  #         username: ${{ secrets.DOCKER_USERNAME }}  
-  #         password: ${{ secrets.DOCKER_PASSWORD }}  
-
-  #     - name: Debug Image Name
-  #       run: echo "docker.io/${{ secrets.DOCKER_USERNAME }}/trythat-frontend-rohit:latest"
-
-  #     - name: Pull the built Docker image
-  #       run: docker pull docker.io/${{ secrets.DOCKER_USERNAME }}/trythat-frontend-rohit:latest
-
-  #     - name: Download Trivy HTML Template
-  #       run: |
-  #         mkdir -p .trivy/
-  #         curl -sSfL https://raw.githubusercontent.com/aquasecurity/trivy/main/contrib/html.tpl -o .trivy/html.tpl
-      
-  #     - name: Run Trivy vulnerability scanner and generate HTML report
-  #       uses: aquasecurity/trivy-action@0.28.0
-  #       with:
-  #         image-ref: 'docker.io/${{ secrets.DOCKER_USERNAME }}/trythat-frontend-rohit:latest'
-  #         format: 'template'
-  #         template: '.trivy/html.tpl'
-  #         output: 'trivy-report.html'
-  #         exit-code: '1'
-  #         ignore-unfixed: true
-  #         vuln-type: 'os,library'
-  #         severity: 'CRITICAL,HIGH'
-
-  #     - name: Upload Trivy Report as Artifact
-  #       uses: actions/upload-artifact@v4
-  #       with:
-  #         name: trivy-report
-  #         path: trivy-report.html
-
-
   Container_trivy_scan:
     name: Run Trivy Security Scan on Docker Image
     needs: docker_build_and_push
@@ -204,9 +134,6 @@ jobs:
         run: |
           echo "## Trivy Scan Report" >> $GITHUB_STEP_SUMMARY
           echo "Vulnerability report generated. Download the artifact to view." >> $GITHUB_STEP_SUMMARY
-
-
-
 
   deploy:
     name: Deploy Frontend Application to EC2
